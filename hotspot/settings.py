@@ -8,17 +8,21 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
+    # binary.inc
     'places',
+    'dashboard',
+
+    # django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     # third party
     'corsheaders',
     'rest_framework',
@@ -113,8 +117,6 @@ MEDIA_URL = '/files/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'files')
 
-AUTH_USER_MODEL = 'places.User'
-
 # CORS_ORIGIN_ALLOW_WHITELIST = [
 #     'http://localhost:19006',
 #     'http://localhost:3000',
@@ -124,9 +126,9 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_BACKENDS': [
-        'rest_framework.auth.TokenAuthentication',
-        'rest_framework.auth.SessionAuthentication',
-        'rest_framework.auth.BasicAuthentication',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
     ]
 }

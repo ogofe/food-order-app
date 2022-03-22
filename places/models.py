@@ -1,129 +1,80 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
-from .utils.helpers import generate_staff_id, generate_invoice_id
+from django.contrib.auth.models import User, Permission
+from .utils.helpers import (
+	generate_staff_id,
+	generate_invoice_id,
+	get_average_rating,
+	parse_image_url,
+)
 from rest_framework.authtoken.models import Token
-
-
-
-class UserManager(BaseUserManager):
-	def create_user(self, first_name, last_name, email, password):
-		user = self.model(
-			first_name=first_name,
-			last_name=last_name,
-			email=email,
-			password=password
-		)
-		user.save()
-		user.set_password(password)
-		user.save()
-
-
-	def create_superuser(self, first_name, last_name, email, password):
-		user = self.model(
-			first_name=first_name,
-			last_name=last_name,
-			email=email,
-			password=password,
-			is_superuser=True,
-			is_staff=True
-		)
-		user.save()
-		user.set_password(password)
-		user.save()
-
-
-class User(AbstractBaseUser):
-	first_name = models.CharField(max_length=100)
-	last_name = models.CharField(max_length=100)
-	email = models.CharField(max_length=100, unique=True)
-	is_staff = models.BooleanField(default=False)
-	is_superuser = models.BooleanField(default=False)
-	date_joined = models.DateField(auto_now=True)
-	last_login = models.DateTimeField(blank=True, null=True)
-	is_active = True
-	objects = UserManager()
-
-	REQUIRED_FIELDS = ['first_name', 'last_name']
-	USERNAME_FIELD = 'email'
-
-	def fullname(self):
-		return self.first_name + ' ' + self.last_name
-
-	def has_perm(self, perm, obj=None):
-		if self.is_superuser:
-			return True
-		return False
-
-	def has_perms(self, perms):
-		if self.is_superuser:
-			return True
-		return False
-
-	def has_module_perms(self, perms):
-		if self.is_superuser:
-			return True
-		return False
-
-	def token(self):
-		key = Token.objects.get_or_create(user=self)[0].key
-		return key
-
-
-
-class StaffPermission(models.Model):
-	code_name = models.CharField(max_length=150)
-	verbose_name = models.CharField(max_length=150)
-
-	def __str__(self):
-		return self.verbose_name
-
+from decimal import Decimal
 
 
 class Staff(models.Model):
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
 	staff_id = models.CharField(default=generate_staff_id, max_length=20)
-	permissions = models.ManyToManyField(StaffPermission, blank=True)
 
-	def has_perm(self, perm):
-		try:
-			perm = StaffPermissions.objects.get(code_name=perm)
-		except StaffPermissions.DoesNotExist:
-			return False
-		else:
-			if perm in self.permissions.all():
-				return True
+	@property
+	def permissions(self):
+		return self.user.permissions.all()
 
+	def grant_permission(self, perm):
+		return
+
+	def revoke_permission(self, perm):
+		return
 
 
 class Customer(models.Model):
-	user = models.OneToOneField(User, on_delete=models.CASCADE)
+	user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
 	verified_email = models.BooleanField(default=False)
-	phone = models.CharField(max_length=20, blank=True, null=True)
+	phone = models.CharField(max_length=20, blank=True, null=True, unique=True)
 	photo = models.ImageField(upload_to="people/", blank=True, null=True)
 	cart = models.ManyToManyField("OrderItem", blank=True)
 	orders = models.ManyToManyField("Order", blank=True)
+	is_app_user = models.BooleanField(default=True)
+
+	def joined(self):
+		return self.user.date_joined
 
 	def __str__(self):
-		return self.user.first_name
+		return self.user.username
 
 	def __repr__(self):
 		return '<Customer {user}>'.format(user=self.user.first_name)
 
 
+
 class Notification(models.Model):
-	icon = models.CharField(max_length=20)
+	to = models.ForeignKey(Customer, on_delete=models.CASCADE)
+	msg_type = models.CharField(max_length=20)
 	message = models.TextField()
+
 
 
 class OrderItem(models.Model):
 	item = models.ForeignKey("FoodItem", on_delete=models.CASCADE)
+	qty = models.IntegerField(default=1)
 	customizations = models.ManyToManyField("OrderCustomization", blank=True)
 
+	def __str__(self):
+		return self.item.title
+
+	@property
+	def total(self):
+		num = (self.item.price * self.qty)
+		for custom in self.customizations.all():
+			num += custom.option.price
+		return Decimal(num)
 
 
 class OrderCustomization(models.Model):
 	customization = models.ForeignKey("Customization", on_delete=models.CASCADE)
 	option = models.ForeignKey("CustomizationOption", on_delete=models.CASCADE)
+
+	def __str__(self):
+		return self.customization.title
+
 
 
 class Order(models.Model): 
@@ -133,37 +84,57 @@ class Order(models.Model):
 		('delivered', 'Delivered'),
 	)
 	owner = models.ForeignKey("Customer", on_delete=models.CASCADE)
+	created_on = models.DateTimeField(auto_now=True)
 	items = models.ManyToManyField(OrderItem, blank=True)
-	cleared = models.BooleanField(default=False) # delivery_status
-	status = models.CharField(choices=ORDER_STATUS, max_length=20, blank=True, null=True)
-	delivery = models.BooleanField(default=False)
-	invoice_id = models.CharField(max_length=12, default=generate_invoice_id)
+	delivered = models.BooleanField(default=False) # delivery_status
+	status = models.CharField(choices=ORDER_STATUS, max_length=20, default='pending')
+	delivery_is_on = models.BooleanField(default=False)
+	invoice = models.CharField(max_length=12, blank=True, null=True, default=generate_invoice_id, unique=True)
 	paid = models.BooleanField(default=False)
 
+	def __str__(self):
+		return self.invoice_id
 
-def parse_image_url(image):
-	return 'http://localhost:8000' + image.image.url
+	def subtotal(self):
+		num = 0
+		for item in items.all():
+			num += item.total
+		return Decimal(num)
+
+
+
+class Tag(models.Model):
+	tag = models.CharField(max_length=50, unique=True)
+
+	def __str__(self):
+		return self.tag
+
+
+
+class Category(models.Model):
+	name = models.CharField(max_length=50, unique=True)
+
+	def __str__(self):
+		return self.name
 
 
 class FoodItem(models.Model):
-	title = models.CharField(max_length=150)
+	title = models.CharField(max_length=150, unique=True)
 	subtitle = models.CharField(max_length=150, blank=True, null=True)
-	customizations = models.ManyToManyField("Customization", blank=True)
+	customizations = models.ManyToManyField("Customization", blank=True, related_name="customizations")
 	about = models.TextField(blank=True, null=True)
-	images = models.ManyToManyField("FoodImage", blank=True)
+	images = models.ManyToManyField("FoodImage", blank=True, related_name="images")
 	price = models.DecimalField(decimal_places=2, max_digits=1000)
-	packed_with = models.ManyToManyField("Associated", blank=True)
-	category = models.CharField(max_length=20, blank=True, null=True)
-	tags = models.CharField(max_length=200, blank=True, null=True)
+	category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, blank=True)
+	tags = models.ManyToManyField(Tag, blank=True)
+	reviews = models.ManyToManyField("Review", blank=True, related_name="reviews")
+	featured = models.BooleanField(default=False)
 
-	def get_reviews(self):
-		pass
-
-	def average_rating(self):
-		stars = []
-		for review in self.get_reviews():
-			stars.append(review.rating)
-		return
+	def rating(self):
+		from .models import Review
+		reviews = Review.objects.filter(food=self)
+		rate = get_average_rating(reviews)
+		return rate
 
 	def __str__(self):
 		return self.title
@@ -181,16 +152,25 @@ class FoodItem(models.Model):
 
 
 class FoodImage(models.Model):
+	item = models.ForeignKey(FoodItem, on_delete=models.CASCADE)
 	image = models.ImageField(upload_to='food/')
 
 	def delete(self):
 		os.remove(os.path.abspath(image.path))
 		super().delete()
 
+	@property
+	def image_url(self):
+		return 'http://localhost:8000' + self.image.url
+	
+
 
 class Customization(models.Model):
-	title = models.CharField(max_length=150)
-	options = models.ManyToManyField("CustomizationOption", blank=True)
+	food = models.ForeignKey(FoodItem, on_delete=models.CASCADE)
+	title = models.CharField(max_length=150, unique=True)
+	options = models.ManyToManyField("CustomizationOption", blank=True, related_name="choices")
+	required = models.BooleanField(default=False)
+	default_option = models.ForeignKey("CustomizationOption", blank=True, null=True, on_delete=models.SET_NULL)
 
 	def __str__(self):
 		try:
@@ -200,15 +180,12 @@ class Customization(models.Model):
 
 
 class CustomizationOption(models.Model):
-	option = models.CharField(max_length=100)
+	to = models.ForeignKey(Customization, on_delete=models.CASCADE)
+	option = models.CharField(max_length=100, unique=True)
 	price = models.DecimalField(decimal_places=2, max_digits=1000, blank=True)
 
 	def __str__(self):
 		return self.option
-
-
-class Associated(models.Model):
-	name = models.CharField(max_length=150, blank=True, null=True)
 
 
 class Review(models.Model):
@@ -216,6 +193,9 @@ class Review(models.Model):
 	food = models.ForeignKey(FoodItem, on_delete=models.CASCADE)
 	rating = models.IntegerField()
 	comment = models.CharField(max_length=500, blank=True, null=True)
+
+	def reviewer(self):
+		return self.by.get_full_name()
 
 	def __str__(self):
 		return self.by.first_name + ' review on : ' + self.food.title
