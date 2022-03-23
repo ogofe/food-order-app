@@ -119,7 +119,7 @@ MEDIA_URL = '/files/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'files')
 
-CORS_ORIGIN_ALLOW_WHITELIST = [
+CORS_ALLOWED_ORIGINS = [
     'https://jtogofe-hotspot.herokuapp.com',
     'https://jtogofe-hotspot.vercel.app',
 ]
