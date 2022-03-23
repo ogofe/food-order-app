@@ -71,7 +71,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': os.path.join(BASE_DIR, 'postgres-database'),
-        'HOST': 'postgres://catkpybjqpwkmo:5db2e4d866ac3fa73d0a40e552f2ee3b34e7324e53f5c0c8e03c8c25529aa30b@ec2-44-194-92-192.compute-1.amazonaws.com:5432/dcm27rtllecg2a',
+        'HOST': 'ec2-44-194-92-192.compute-1.amazonaws.com/dcm27rtllecg2a',
         'USER': 'catkpybjqpwkmo',
         'PASSWORD': '5db2e4d866ac3fa73d0a40e552f2ee3b34e7324e53f5c0c8e03c8c25529aa30b',
         'PORT' : '5432'
