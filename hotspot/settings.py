@@ -2,7 +2,7 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = 'hgs2&c7cz3lk^ubz=imhw=*(7+h7l)o%yu6=4-sj^oy(d1n7gr'
+SECRET_KEY = os.getenv('DJANGO_SECRET')
 
 DEBUG = True
 
@@ -69,8 +69,12 @@ ASGI_APPLICATION = 'hotspot.asgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.path.join(BASE_DIR, 'postgres-database'),
+        'HOST': 'ec2-44-194-92-192.compute-1.amazonaws.com',
+        'USER': 'catkpybjqpwkmo',
+        'PASSWORD': '5db2e4d866ac3fa73d0a40e552f2ee3b34e7324e53f5c0c8e03c8c25529aa30b',
+        'PORT' : '5432'
     }
 }
 
