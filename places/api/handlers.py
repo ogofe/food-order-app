@@ -61,10 +61,7 @@ class SignupView(APIView):
 @api_view(["POST"])
 def login_view(request):
 	try:
-		if '@' in request.data['email']:
-			user = User.objects.get(email=request.data['email'])
-		else:
-			user = User.objects.get(username=request.data['email'])
+		user = User.objects.get(email=request.data['email'])
 		if user.check_password(request.data['password']):
 			person = Customer.objects.get(user=user)
 			login(request, user)
