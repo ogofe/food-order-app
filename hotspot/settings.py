@@ -6,7 +6,7 @@ SECRET_KEY = 'hgs2&c7cz3lk^ubz=imhw=*(7+h7l)o%yu6=4-sj^oy(d1n7gr'
 
 DEBUG = True
 
-ALLOWED_HOSTS = [ "https://jtogofe-hotspot.herokuapp.com", ]
+ALLOWED_HOSTS = [ "jtogofe-hotspot.herokuapp.com", ]
 
 # Application definition
 
