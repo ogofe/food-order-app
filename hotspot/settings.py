@@ -6,7 +6,7 @@ SECRET_KEY = 'hgs2&c7cz3lk^ubz=imhw=*(7+h7l)o%yu6=4-sj^oy(d1n7gr'
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [ "https://jtogofe-hotspot.herokuapp.com", ]
 
 # Application definition
 
@@ -119,12 +119,12 @@ MEDIA_URL = '/files/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'files')
 
-# CORS_ORIGIN_ALLOW_WHITELIST = [
-#     'http://localhost:19006',
-#     'http://localhost:3000',
-# ]
+CORS_ORIGIN_ALLOW_WHITELIST = [
+    'https://jtogofe-hotspot.herokuapp.com',
+    'https://jtogofe-hotspot.vercel.app',
+]
 
-CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ORIGIN_ALLOW_ALL = True
 
 
 REST_FRAMEWORK = {
