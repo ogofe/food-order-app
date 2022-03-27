@@ -68,7 +68,7 @@ ASGI_APPLICATION = 'hotspot.asgi.application'
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(ssl_require=True, conn_max_age=1500, default="postgres://catkpybjqpwkmo:5db2e4d866ac3fa73d0a40e552f2ee3b34e7324e53f5c0c8e03c8c25529aa30b@ec2-44-194-92-192.compute-1.amazonaws.com:5432/dcm27rtllecg2a")
+    'default': dj_database_url.config(ssl_require=True, conn_max_age=1500, default=os.getenv('DATABASE_URL'))
 }
 
 
