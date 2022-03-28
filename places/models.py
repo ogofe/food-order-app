@@ -161,6 +161,9 @@ class FoodImage(models.Model):
 
 	@property
 	def image_url(self):
+		if not '.herokuapp.com' in self.image.url:
+			print("setting up media url")
+			return 'https://jtogofe-hotspot.herokuapp.com' + self.image.url
 		return self.image.url
 	
 
