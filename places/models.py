@@ -161,7 +161,7 @@ class FoodImage(models.Model):
 
 	@property
 	def image_url(self):
-		return 'http://localhost:8000' + self.image.url
+		return self.image.url
 	
 
 
