@@ -7,7 +7,8 @@ from . import webhooks
 
 urlpatterns = [
     path('', include('places.urls', namespace='core')),
-    path('admin/', include('dashboard.urls', namespace='dashboard')),
+    path('admin/', admin.site.urls),
+#     path('admin/', include('dashboard.urls', namespace='dashboard')), # update required
     path('webhook/', webhooks.successful_payment_webhook, name="checkout-hook"),
 ]
 
