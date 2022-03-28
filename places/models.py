@@ -157,7 +157,7 @@ class FoodImage(models.Model):
 	image = models.ImageField(upload_to='food/')
 
 	def delete(self):
-		os.remove(os.path.abspath(image.path))
+		os.remove(os.path.abspath(self.image.path))
 		super().delete()
 
 	@property
