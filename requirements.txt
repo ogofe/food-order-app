@@ -55,4 +55,5 @@ Twisted==20.3.0
 txaio==21.2.1
 urllib3==1.26.3
 websockets==8.1
+whitenoise
 zope.interface==5.2.0
