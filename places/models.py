@@ -154,7 +154,8 @@ class FoodItem(models.Model):
 
 class FoodImage(models.Model):
 	item = models.ForeignKey(FoodItem, on_delete=models.CASCADE)
-	image = models.ImageField(upload_to='food/')
+	image = models.ImageField(upload_to='food/', blank=True, null=True)
+	image_src = models.URLField(blank=True, null=True)
 
 	def delete(self):
 		os.remove(os.path.abspath(self.image.path))
