@@ -14,7 +14,9 @@ def generate_invoice_id():
 
 
 def parse_image_url(image):
-	return 'https://jtogofe-hotspot.herokuapp.com' + image.image.url
+	if not image.image_src:
+		return 'https://jtogofe-hotspot.herokuapp.com' + image.image.url
+	return image.image_src
 
 
 def get_average_rating(reviews):
