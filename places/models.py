@@ -157,6 +157,14 @@ class FoodImage(models.Model):
 	image = models.ImageField(upload_to='food/', blank=True, null=True)
 	image_src = models.URLField(blank=True, null=True)
 
+	def __str__(self):
+		count = 1
+		for i in self.item.images.all():
+			if not i == self:
+				count += 1
+			break			
+		return f'{self.item.name} image - {count}'
+		
 	def delete(self):
 		try:
 			os.remove(os.path.abspath(self.image.path))
