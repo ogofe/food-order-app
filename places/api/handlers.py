@@ -153,12 +153,10 @@ def menu_view(request):
 			"featured_items": FoodSerializer(FoodItem.objects.filter(featured=True), many=True).data
 		}
 	except Exception as e:
-		
 		res = {
 			'error': True,
 			'error_text': str(e),
 		}
-		raise e
 	return Response(data=res, status=200)
 
 
