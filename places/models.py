@@ -158,7 +158,10 @@ class FoodImage(models.Model):
 	image_src = models.URLField(blank=True, null=True)
 
 	def delete(self):
-		os.remove(os.path.abspath(self.image.path))
+		try:
+			os.remove(os.path.abspath(self.image.path))
+		except Exception as e:
+			print("error:", e)
 		super().delete()
 
 	@property
