@@ -163,7 +163,7 @@ class FoodImage(models.Model):
 			if not i == self:
 				count += 1
 			break			
-		return f'{self.item.name} image - {count}'
+		return f'{self.item.title} image - {count}'
 		
 	def delete(self):
 		try:
